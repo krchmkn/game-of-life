@@ -1,4 +1,3 @@
 # game-of-life
 
-Implementation in Rust
-
+Rust and WebAssembly
