@@ -1,17 +1,45 @@
 import init, { Universe } from "./pkg/game_of_life.js";
 
 const main = async () => {
-  await init();
+  await init({});
 
-  const pre = document.getElementById("game-of-life-canvas");
+  const container = document.getElementById("game-of-life-canvas");
   const universe = Universe.new();
 
+  let animationId = null;
+
   const renderLoop = () => {
-    pre.textContent = universe.render();
-    universe.tick();
-    requestAnimationFrame(renderLoop);
+    container.textContent = universe.render();
+
+    for (let i = 0; i < 10; i++) {
+      universe.tick();
+    }
+
+    animationId = requestAnimationFrame(renderLoop);
   };
 
-  requestAnimationFrame(renderLoop);
+  const playPauseButton = document.getElementById("play-pause");
+
+  const play = () => {
+    playPauseButton.textContent = "⏸";
+    renderLoop();
+  };
+
+  const pause = () => {
+    playPauseButton.textContent = "▶";
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  };
+
+  playPauseButton.addEventListener("click", (event) => {
+    if (animationId === null) {
+      play();
+    } else {
+      pause();
+    }
+  });
+
+  // play();
 };
+
 main();

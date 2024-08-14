@@ -1,5 +1,7 @@
-use wasm_bindgen::prelude::*;
+mod tests;
+
 use std::fmt;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 #[repr(u8)]
@@ -16,7 +18,6 @@ pub struct Universe {
     cells: Vec<Cell>,
 }
 
-#[wasm_bindgen]
 impl Universe {
     fn get_index(&self, row: u32, column: u32) -> usize {
         (row * self.width + column) as usize
@@ -39,6 +40,24 @@ impl Universe {
         count
     }
 
+    fn init_cells(&mut self) {
+        self.cells = (0..self.width * self.height).map(|_i| Cell::Dead).collect();
+    }
+
+    pub fn get_cells(&self) -> &[Cell] {
+        &self.cells
+    }
+
+    pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
+        for (row, col) in cells.iter().cloned() {
+            let idx = self.get_index(row, col);
+            self.cells[idx] = Cell::Alive;
+        }
+    }
+}
+
+#[wasm_bindgen]
+impl Universe {
     pub fn tick(&mut self) {
         let mut next = self.cells.clone();
 
@@ -64,10 +83,10 @@ impl Universe {
     }
 
     pub fn new() -> Universe {
-        let width = 64;
-        let height = 64;
+        const WIDTH: u32 = 128;
+        const HEIGHT: u32 = 128;
 
-        let cells = (0..width * height)
+        let cells = (0..WIDTH * HEIGHT)
             .map(|i| {
                 if i % 2 == 0 || i % 7 == 0 {
                     Cell::Alive
@@ -78,14 +97,24 @@ impl Universe {
             .collect();
 
         Universe {
-            width,
-            height,
+            width: WIDTH,
+            height: HEIGHT,
             cells,
         }
     }
 
     pub fn render(&self) -> String {
         self.to_string()
+    }
+
+    pub fn set_width(&mut self, width: u32) {
+        self.width = width;
+        self.init_cells();
+    }
+
+    pub fn set_height(&mut self, height: u32) {
+        self.height = height;
+        self.init_cells();
     }
 }
 
@@ -102,6 +131,3 @@ impl fmt::Display for Universe {
         Ok(())
     }
 }
-
-
-
